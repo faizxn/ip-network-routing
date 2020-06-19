@@ -1,0 +1,86 @@
+
+#> Control-Plane Protection Traffic Types:   1. Host .. 2. Transit (like NAT, ICMP).. and 3. CEF Expcetion (TTL <=1 ).. 
+
+Host: -> To the device..
+
+Two additional features (Host): 1. Port-Filtering 2. Queue threshold
+
+.....................................................................................................................
+
+> show any log packet via router: 
+# ip access-list myacl permit ip any any log
+
+> show any log packet at control-plane: 
+
+# ip access-list ccie permit ip any any 
+# class-map cmap 
+   match access-group name  ccie
+
+# policy-map pmap
+   class cmap 
+   log
+
+# control-plane transit 
+   service-policy input pmap
+
+# show control-plane counters
+
+------------------------Limited Exceed Telnet Packet---------------------------
+
+# ip access-list 100 permit tcp any any eq telnet
+# class-map cmap
+   match access-group 100
+
+# policy-map pmap 
+   class cmap 
+   no drop
+   police rate 50 pps exceed-action drop conform-action transmit
+   
+#>>>>>> Apply the rule to control-plane exception...
+
+# ip access-list log-update threshold 1
+
+
+-------------------------------------------------------------------------------
+
+
+as ASA | FTD has management interface.  So IOS router has management.  
+
+#control-plane host
+         management-interface fastEthernet 0/0 allow  telnet
+
+
+---------------- control-plane > port-filter------------!!
+
+<!----enable this command to show  RST message from router..   
+
+# debug ip tcp transactions
+
+# class-map type port-filter cmap
+   match closed-ports
+
+# policy-map type port-filter pmap
+   class cmap
+   drop
+
+# control-plane host
+        service-policy type port-filter input pmap  
+  
+#show policy-map type port-filter control-plane input
+
+---------------- control-plane > queue threshold------------!!
+
+# show int fa0/1
+
+Bydefault input queue is 75 packet and output is 40 packet
+.. we assign 50 packet for bgp and 10 packet ospf and other are rest of others service.
+
+# class-map type queue-threshold cmap
+   match protocol bgp
+
+# policy-map type queue-threshold pmap
+   class cmap
+   queue-limit 50
+
+# control-plane host
+   service-policy type queue-threshold input pmap

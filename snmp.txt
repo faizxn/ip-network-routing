@@ -1,0 +1,17 @@
+#show ip port-map
+
+#> 3 terms in snmp:
+	1. snmp server (device pc/linux)
+	2. smp clinet (router)
+	3. smp mib (database of router as object)
+
+#> traps = conditions
+
+snmpv2- community string
+snmpv3- 3 modes > authentication.. pri (encryption).. noauth nopriv
+
+# ip access-list 10 permit 10.0.0.1 
+
+# snmp-server group router v3 priv access 10
+# snmp-server user ccie router v3 auth md5 cisco priv des cisco
+# show smp user

@@ -1,0 +1,29 @@
+
+ root view  > have entire priviledge
+ super view > combination of two more user views.
+
+ # parser view ccie superview
+    secret cisco
+    view ccna
+    view ccna
+# username superview view ccie password cisco 
+
+ user view >
+
+
+
+ # enable view
+  
+ # aaa new-model    <!-- By default authentication is enabled. But authorization is disabled. Need to enable it at Parser View.
+ # aaa authorization exec default local
+
+ # enable password cisco    <!-- password of privilege level
+
+ # disable
+ # enable view
+
+# show parser view 
+
+# parse view support
+          secret cisco
+          commands 

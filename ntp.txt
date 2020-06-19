@@ -1,0 +1,32 @@
+udp: 
+
+#> StratumNumber (1-15): assingn this number to become ntp server. According to ntp client lower is preferred.
+
+# ntp master 2
+
+ISP (ntp-master/server)------->R1(ntp-client/server)--------------->R2/R3/R4(ntp-client/server)--------->R5/R6/R7(ntp-client)
+
+# ntp server 1.1.1.1
+# show ntp assocaitions
+# show ntp status
+
+-----------------------------------------------------------------
+
+# ntp authentication-key 1 md5 cisco
+# ntp trusted-key 1
+# ntp authenticate 
+
+# ntp server 2.2.2.2 key 1 prefer  
+
+---------------------------------------------------------------
+
+
+
+# ntp update-calendar
+ 
+The 'ntp update-calendar' forces the hardware clock to synchronise with the system's software clock. After a couple of minutes, we check to see if the two clocks have synchronised:
+
+# show clock
+02:07:05.011 Athens Sun Apr 19 2009
+
+# show calendar

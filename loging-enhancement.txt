@@ -1,0 +1,15 @@
+
+> 2 attempt with 15 sec. block the access for next 30 sec.
+
+# login block-for 30 attempts 2 within 15
+# login on-success log
+# login on-failure log
+
+<!------------------ access-class >  acl destination acl should be <any> always...
+
+# access-list 101  permit tcp host 10.0.0.1 any eq 23
+
+# show login
+# show login failures
+
+# login quite-mode access-class 101

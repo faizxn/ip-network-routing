@@ -1,0 +1,53 @@
+------------------Context-Based Access Control 
+
+ Is a firewall for Cisco IOS routers that offers inspect up to layer 7 of the OSI model and can dynamically create rules to allow return traffic. 
+It is similar to the reflexive access-list but one of the key differences is that the reflexive ACL only inspects up to layer 4.
+
+
+# show ip port-map
+
+# ip port-map http port tcp 8080   <!--  we can update the database--!!!
+
+# show ip port-map | i http
+
+>both 80| 8080 will be in table 
+
+80 - system defined 
+8080 - user defined
+
+R1 -------------------------- fa0/0 - R2 - fa0/1 -----------------------R3 
+
+# ip inspect name mycbac telnet
+# ip inspect name mycbac ssh 
+
+# ip inspect name mycbac tcp
+# ip inspect name mycbac udp
+# ip inspect name mycbac icmp
+
+# ip access-list extend 100 deny ip any any log
+
+# int fa0/1
+   ip inspect mycbac out
+   ip access-group 100 in
+
+-------------------------------------------------------------------------
+
+
+#hierarchy security steps:
+
+ reflexive acl
+ cbac
+ zone base firewall 
+---------
+
+Note: self generated traffic is not inspected.
+
+#ip inspect name mycbac icmp router-traffic    !!< now router will  inspect its self generated traffic !!!    <<CBAC
+#ip inspect name mycbac icmp audit-trails on     !!< keep track of each and every activity !!!
+
+#ip inspect name mycbac tcp router-traffic    !!< now router will  inspect its self generated traffic !!!    <<CBAC
+#ip inspect name mycbac tcp audit-trails on     !!< keep track of each and every activity !!!    
+
+
+
+

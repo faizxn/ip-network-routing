@@ -1,0 +1,22 @@
+
+ # R1    ---------------  R2    || there are two link via two switches.
+
+
+ # ip verify unicast rechable-via rx   > apply at single interface.
+ # ip verify unicast rechable-via rx allow-default         > apply at single interface.    by default rx only conside dynamic or static route.. default route does not conside. 
+
+src > 1.1.1.1   dst> 2 2.2.2
+
+ # access-list 101 permit icmp host 1.1.1.1 host 2.2.2.2
+ # ip verify unicast rechable-via rx 101
+
+
+
+expcetion, i want dont check my own management ip.
+
+
+
+
+
+ # ip verify unicast rechable-via any   > used load-balance interface. we cant verify the single interface to verify such link. 
+ 

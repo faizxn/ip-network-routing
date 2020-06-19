@@ -1,0 +1,27 @@
+
+#!!! The reflexive access-list acks as stateful firewall. By default an access-list on a Cisco router doesnt keep track of any connections.
+
+ 
+
+ #> reflexive acl must have to be in name.. acl
+
+
+# TCP session connetion log:
+ 
+ #>  ip reflexsive-list timeout 50
+
+ # ip access-list extended my_acl_out
+    permit tcp any any reflect tcp
+    permit icmp any any reflect icmp
+
+# int fa0/1
+   ip access-group my_acl_out out
+   
+# ip access-list extend my_acl_in 
+   evaluate my_acl_out
+   deny ip any any 
+
+# int fa0/1
+   ip access-group my_acl_in in
+
+# show ip access-list 

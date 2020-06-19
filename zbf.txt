@@ -1,0 +1,49 @@
+
+Note: when creating class-map type inspect > it will create class-default  class-map. It will match-any if no match found at type inspect. 
+
+For class-default log generation.. 
+
+# policy-map type inspect pmap
+   class class-default
+      drop log
+
+ Create zone:---------------------------------
+
+ # zone security inside
+ # zone security dmz
+ # zone security outside
+
+ Assign to interface:----------------------------
+
+ # int fa0/0
+          zone-member security inside
+ # int fa0/1
+           zone-member security outside
+ # int fa1/0
+            zone-member security dmz
+
+
+Mark and apply policy:-----------------------------        
+
+ # class-map type inspect match-any cmap
+    match protocol http
+    match protocol telnet
+    match protocol icmp
+
+# policy-map type inspect pmap
+   class cmap 
+   inspect
+
+Zone-pair:------------------------------------------------
+
+ # zone-pair security in-out-pair source inside destination outside 
+    service-policy type inspect pmap
+
+------------------------
+
+# show zone-pair security
+# show class-map type inspect
+# show policy-map type inspect
+# show policy-map type inspect zone-pair
+
+                                                              

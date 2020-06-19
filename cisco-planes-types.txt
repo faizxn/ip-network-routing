@@ -1,0 +1,15 @@
+ 
+# Manement Plane:
+    SSH.. Telnet.. SNMP.. XML.. RMON
+
+ # Control Plane:
+    Layer-2 Protocol :  STP.. LACP.. CDP.. 
+    Layer-3 Protocol :  OSPF.. BGP.. ARP.. PIM.. EIGRP.. HSRP.. VRRP.. GLBP
+    Storage Protocol :  VSAN.. FCIP.. FSPF.. IVR                   <!-- Fiber Channel over IP (FCIP) and Fabric Shortest Path First (FSPF)
+  
+ # Data Plane:
+    Layer-2 Forwarding :  STP States.. MAC Table
+    Layer-3 Forwarding :  FIB.. Adjacency Table
+    Storage Protocols     :  FC Forwarding Table  
+    
+

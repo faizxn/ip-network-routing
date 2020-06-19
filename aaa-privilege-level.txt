@@ -1,0 +1,70 @@
+
+
+ # disable 0     > bottom privilege level is . Only 5 commands are available.
+ # level 1 > default user level. this level provides user many commands. 
+
+-----------------------
+
+# privilege exec level 6 show
+# privilege configure level 6 interface
+# privilege configure level 6 configure terminal
+# privilege configure level 6 router eigrp 
+
+
+ 
+
+-----------------------------------------
+
+ line aux 0                       >>>>>>>>   Auxiliary line
+ line console 0                >>>>>>>>   Primary terminal line
+ line 0 4 tty                     >>>>>>>>   Terminal controller
+
+
+--------------------------------------
+
+
+privilege level : 0-15
+system defined: 0,1,15
+custom define : 2-14
+
+-A user of higher privilege level can access the lower privilege level command. 
+
+# radius-server host 10.0.0.1 key password
+# tacacs-server host 10.0.0.1 key password
+
+
+
+
+
+# aaa authentication login  default local                                        <!--- default method here for all lines like vty.. console
+# aaa authentication login default group radius/tacas local 
+
+# test aaa group radius cisco cisco legacy    <!--- used to check the conntivity with radious or tacacs server.
+# debug radius | tacacs
+
+# aaa authorization exec login  default local                  <!-- exec means CLI .. takes from unix
+# aaa authorization exec login  default local if-authenticated
+-------------------------
+
+
+# aaa new-model
+# aaa authentication login myauth group tacacs+ local
+# aaa authorization exec myexec group tacacs+ local
+# aaa authorization exec myexec group tacacs+ local if-authenticated
+# aaa authorization commands 0 mycommands group tacacs+ local
+# aaa authorization commands 1 mycommands group tacacs+ local
+# aaa authorization commands 15 mycommands group tacacs+ local
+
+
+# line vty 0 4
+   login authentication myauth
+   authorization exec myexec 
+   authorization commands 0 mycommands     
+   authorization commands 1 mycommands 
+   authorization commands 15 mycommands 
+
+# tacacs-server host 10.0.0.1 key cisco
+# tacacs-server host 10.0.0.1 key cisco timeout 5      <!-- 5 sec server responds
+# radius-server host 10.0.0.1 auth-port 1812 acct-port 1813 key cisco timeout 4
+
+

@@ -1,0 +1,129 @@
+
+
+________________ ldp neighbor_________________________________________
+
+		646/224.0.0.2
+
+ # show mpls interface gi0/2
+ # show mpls forwarding-table 1.1.1.1 		<!-- show mpls local/remote label and nex-hop interface
+ # show mpls forwarding-table labels 100/200	<!-- show above information and do trace route for checking the labels
+ # show mpls ldp bindings neighbor 1.1.1.1
+			
+ # clear mpls ldp neighbor 1.1.1.1 / all(*)	<!-- check wireshark to show the types of mpls packets
+ 
+_________________ mpls ping and traceroute_____________________________
+ 
+ # traceroute mpls ipv4 1.1.1.1/32 exp 5 verbose
+ # ping mpls ipv4 1.1.1.1/32 verbose
+ # ping mpls ipv4 1.1.1.1/32 sweep 1500 1600 1 		<!-- check mtu range
+
+
+_________________ mpls label advertisement_____________________________
+
+ #? R4 only sends labels for SW to R2 and R3
+ #? R5 stops sending any label to R5
+ #? R2 only received label for SW Loopback 10 address from R4 
+
+	SW
+
+	R4
+
+R3		R2
+
+	R5
+
+
+R4# ip access-list standard r3-r4-loopback
+	permit host 2.2.2.2
+	permit host 3.3.3.3
+
+ # ip access-list standard sw-loopback-all
+	permit 10.10.0.0 0.0.3.255
+
+ # no mpls ldp advertise-labels
+    mpls ldp advertise-labels for sw-loopback-all to r3-r4-loopback
+
+
+R2# ip access-list standard sw-loopback-10
+	permit 10.10.0.0 0.0.0.255 
+
+ # mpls ldp neighbor 4.4.4.4 labels accept sw-loopback-10  
+  
+ # show mpls ldp bindings neighbor 4.4.4.4
+ # show mpls forwarding-table 0.0.0.0/0			<!-- by default.. mpls does not provide label to default route.
+ 
+ # mpls ip default-route
+
+
+___________________mpls ldp authentication_________________    
+
+ # mpls ldp neighbor 4.4.4.4 password cisco		<!-- for single p2p link
+ 
+ # mpls ldp password required				<!-- for all neighbors authentication
+   mpls ldp password fallback cisco 			<!-- neighbor should use above command
+ 
+ # show mpls ldp neighbor password			<!-- to check password
+ 
+R2# ip access-list standard r5-loopback 
+	permit 5.5.5.5
+
+   key chain key-ldp
+	key 1
+	  key-string cisco
+
+   mpls ldp password option 1 for r5-loopback key-chain key-ldp
+   mpls ldp password required for r5-loopback
+
+
+__________________mpls target ldp /session protection_____________________
+
+
+	R4
+
+R3		 R2
+
+	R5
+
+
+	target ldp	> R2-5 target ldp 	
+	  
+R2# mpls ldp neighbor 5.5.5.5 target ldp					<!-- R2 is active ldp
+R5# ip access-list standard r2-loopback						<!-- R5 is passive ldp 
+		permit host 2.2.2.2
+	
+	mpls ldp discovry target-hello accept from r2-loopback
+	show mpls ldp discovry
+	
+	
+	session protection >	R3-4-5 maintain their LDP session when their directly links are down
+	by default when we configure > mpls ldp session protection
+	
+R3# ip access-list standard mpls-protection
+	   permit 4.4.4.4
+	   permit 5.5.5.5
+	 
+	mpls ldp session protection for mpls-protection
+	
+R4# ip access-list standard mpls-protection
+	   permit 3.3.3.3
+	   permit 5.5.5.5
+   	
+	mpls ldp session protection for mpls-protection
+	
+R5# ip access-list standard mpls-protection
+	   permit 3.3.3.3
+	   permit 4.4.4.4
+   	
+	mpls ldp session protection for mpls-protection
+
+  show mpls ldp discovery
+  
+  
+_____________mpls vpn______________________
+
+pe-ce routing via vrf with ospf | bgp | eirgp | is-is | ripv2
+
+
+
+
+

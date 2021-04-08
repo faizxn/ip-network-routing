@@ -1,0 +1,52 @@
+	
+	gi-0/0 - wan
+	gi-0/1 - lan
+	
+	PPPoE:
+	
+	interface gi-0/0
+	no ip address
+	description WAN
+	pppoe enable group global
+	pppoe-client dial-pool-number 1
+	
+	interface Dialer1
+	mtu 1492
+	ip nat outside
+	ip address negotiated
+	encapsulation ppp
+	ip tcp adjust-mss 1442
+	dialer pool 1
+	dialer-group 1
+	ppp authentication pap calling
+	ppp pap sent-username username password password
+	
+	ip route 0.0.0.0 0.0.0.0 Dialer1
+	
+	
+	DHCP:
+	
+	interface gi-0/1
+	ip address 10.0.0.1 255.255.255.0
+	ip nat inside
+	ip virtual-reassembly in
+	no shut
+	description LAN
+	
+	
+	service dhcp
+	ip dhcp pool LAN
+	network 10.0.0.0 255.255.255.0
+	default-router 10.0.0.1
+	dns-server 1.1.1.1
+	
+	NAT:
+	
+	interface Dialer1
+	ip nat outside
+	
+	interface gi-0/1
+	ip nat inside
+	
+	ip nat inside source list 1 interface Dialer1 overload
+	

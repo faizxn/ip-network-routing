@@ -1,0 +1,235 @@
+
+	
+	# show vpc
+	# show vpc role
+	# show vpc brief 
+	# show vpc peer-keepalive
+	# show vpc consistency-parameters global
+
+	Nexus-1/2:
+	
+	Nexus-1/2(config)# feature vpc
+	Nexus-1/2(config)# feature lacp
+	
+-------------------------------------------------------------------------------------------------------------------------------		
+	
+#Keep Alive Link:
+	
+	Nexus-1:
+	Nexus-1(config)# interface mgmt 0
+	Nexus-1(config-if)# ip address 10.0.0.1/30
+	Nexus-1(config-if)# no shutdown
+	
+	Nexus-2:
+	Nexus-2(config)# interface mgmt 0
+	Nexus-2(config-if)# ip address 10.0.0.2/30
+	Nexus-2(config-if)# no shutdown
+	
+	Nexus-1# ping 10.0.0.2 vrf management
+	Nexus-2# ping 10.0.0.1 vrf management
+
+
+#vPC Domain: A vPC domain is a collection of vPC component. In this example, we will be using vPC domain 1. You can choose domain id between <1-1000>. And, also we will set priorities for both switches. Lower priority will become primary.
+
+	Nexus-1:
+	Nexus-1(config)# vpc domain 1
+	Nexus-1(config-vpc-domain)# role priority 20
+	Nexus-1(config-vpc-domain)# peer-keepalive destination 10.1.1.2 source 10.1.1.1 vrf management
+	
+	Nexus-2:
+	Nexus-2(config)# vpc domain 1
+	Nexus-1(config-vpc-domain)# role priority 30
+	Nexus-2(config-vpc-domain)# peer-keepalive destination 10.1.1.1 source 10.1.1.2 vrf management
+
+
+#Peer Link: The peer link exchanges state information and carries control traffic between peer nexus switches.
+
+	Nexus-1:
+	Nexus-1(config)# interface ethernet 1/1-2
+	Nexus-1(config-if-range)# channel-group 20 mode active
+	Nexus-1(config-if-range)# no shutdown
+	
+	Nexus-1(config)# interface port-channel 20
+	Nexus-1(config-if)# no shutdown
+	Nexus-1(config-if)# switchport
+	Nexus-1(config-if)# switchport mode trunk
+	Nexus-1(config-if)# vpc peer-link
+	
+	Nexus-2:
+	Nexus-2(config)# interface ethernet 1/1-2
+	Nexus-2(config-if-range)# channel-group 20 mode active
+	Nexus-1(config-if-range)# no shutdown
+	
+	Nexus-2(config)# interface port-channel 20
+	Nexus-2(config-if)# no shut
+	Nexus-2(config-if)# switchport
+	Nexus-2(config-if)# switchport mode trunk
+	Nexus-2(config-if)# vpc peer-link
+	
+
+To verify, use need to use, “show vpc brief” command.
+
+	Nexus-1# show vpc brief
+	Legend:
+					(*) - local vPC is down, forwarding via vPC peer-link
+	
+	vPC domain id                     	: 1
+	Peer status                       	: peer adjacency formed ok
+	vPC keep-alive status             	: peer is alive
+	Configuration consistency status  	: success
+	Per-vlan consistency status       	: success
+	Type-2 consistency status         	: success
+	vPC role                          	: primary
+	Number of vPCs configured         	: 0
+	Peer Gateway                      	: Disabled
+	Dual-active excluded VLANs        	: -
+	Graceful Consistency Check        	: Enabled
+	Auto-recovery status              	: Disabled
+	Delay-restore status              	: Timer is off.(timeout = 30s)
+	Delay-restore SVI status          	: Timer is off.(timeout = 10s)
+	Operational Layer3 Peer-router    	: Disabled
+	
+	vPC Peer-link status
+	---------------------------------------------------------------------
+	id    Port   Status Active vlans
+	--    ----   ------ -------------------------------------------------
+	1     Po20   up     1
+	
+
+#Member Ports: Member ports are the ports where end device is connected. We need to configure port-channel for the end device.
+
+	Nexus-1:
+	Nexus-1(config)# interface eth 1/3
+	Nexus-1(config-if)# channel-group 30 mode active
+	!
+	Nexus-1(config-if)# interface port-channel 30
+	Nexus-1(config-if)# switchport
+	Nexus-1(config-if)# switchport mode access
+	Nexus-1(config-if)# switchport access vlan 30
+	Nexus-1(config-if)# vpc 30
+	
+	Nexus-2:
+	Nexus-2(config)# interface eth 1/3
+	Nexus-2(config-if)# channel-group 30 mode active
+	!
+	Nexus-2(config-if)# interface port-channel 30
+	Nexus-2(config-if)# switchport
+	Nexus-2(config-if)# switchport mode access
+	Nexus-2(config-if)# switchport access vlan 30
+	Nexus-2(config-if)# vpc 30
+	
+	
+NX-1/2# show vpc brief
+	Legend:
+			(*) - local vPC is down, forwarding via vPC peer-link
+	
+	vPC domain id                     	: 1
+	Peer status                       	: peer adjacency formed ok
+	vPC keep-alive status             	: peer is alive
+	Configuration consistency status    : success
+	Per-vlan consistency status       	: success
+	Type-2 consistency status         	: success
+	vPC role                          	: primary
+	Number of vPCs configured           : 1
+	Peer Gateway                      	: Disabled
+	Dual-active excluded VLANs          : -
+	Graceful Consistency Check        	: Enabled
+	Auto-recovery status              	: Disabled
+	Delay-restore status              	: Timer is off.(timeout = 30s)
+	Delay-restore SVI status          	: Timer is off.(timeout = 10s)
+	Operational Layer3 Peer-router    	: Disabled
+	
+	vPC Peer-link status
+	---------------------------------------------------------------------
+	id    Port   Status Active vlans
+	--    ----   ------ -------------------------------------------------
+	1     Po20   up     1
+	
+	vPC status
+	----------------------------------------------------------------------------
+	Id    Port          Status Consistency Reason                Active vlans
+	--    ------------  ------ ----------- ------                ---------------
+	30    Po30          down*  success     success               30
+	
+	
+	-----------------------------------------------------------------------------------------------------
+	
+
+#Keepalive monitoring without mgt-interface: 
+
+	NX-1(config)# vlan 100
+	NX-1(config-vlan)# name keepalive
+	NX-1(config# vrf context keepalive
+	
+	NX-1(config)# interface Vlan100
+	NX-1(config-if)# vrf member keepalive
+	NX-1(config-if)# ip address 10.0.0.1/30
+	
+	NX-1(config)# interface Ethernet1/1
+	NX-1(config)# switchport mode access
+	NX-1(config)# switchport access vlan 100
+	
+	
+	NX-2(config)# vlan 100
+	NX-2(config-vlan)# name keepalive
+	NX-2(config# vrf context keepalive
+	
+	NX-2(config)# interface Vlan100
+	NX-2(config-if)# vrf member keepalive
+	NX-2(config-if)# ip address 10.0.0.2/30
+	
+	NX-2(config)# interface Ethernet1/1
+	NX-2(config)# switchport mode access
+	NX-2(config)# switchport access vlan 100
+	
+
+#ping-peerlink:
+
+	NX-1/2# ping 10.0.0.1 vrf keepalive
+	
+	NX-1(config)# vpc domain 1
+	NX-1(config)# peer-keepalive destination 10.0.0.2 source 10.0.0.1 vrf keepalive
+	
+	NX-2(config)# vpc domain 1
+	NX-2(config-vpc-domain)# peer-keepalive destination 10.0.0.1 source 10.0.0.2 vrf keepalive
+	
+
+-----------------------------------------------------------------------------------------------------
+
+
+#spanning-tree port type network : this command used under peer-link and port-channel. switchport connected to other switches and bridges via point to point link should be configured as network port. 
+
+NX-1/2(config)# interface port-channel 20
+NX-1/2(config-if)# description VPC-PEERS-LINK
+NX-1/2(config-if)# switchport mode trunk
+NX-1/2(config-if)# switchport trunk allowed vlan 10
+NX-1/2(config-if)# vpc peer-link
+NX-1/2(config-if)# spanning-tree port type network
+
+
+#peer-gateway: it enables local forwarding of such packets without the need to cross the vPC Peer-Link. This feature optimizes the use of the peer link and avoids potential traffic loss in FHRP scenarios.
+		
+		NX-1/2(config)# vpc domain 1
+		NX-1/2(config-vpc-domain)# peer-gateway
+ 
+	
+#peer-switch: This feature allows a pair of Cisco Nexus switches to appear as a single spanning tree root in the Layer 2 topology. It eliminates the need to pin the spanning tree root to the vPC primary switch and improves vPC convergence if the vPC primary switch fails.
+	
+ 		NX-1/2(config)# vpc domain 1
+		NX-1/2(config-vpc-domain)# peer-switch
+		
+		
+# ip arp synchronize: feature allows the synchronization of the ARP table when the peer-link comes up.
+# delay-restoration:  of the vPC ports for a configurable time by using the delay restore command, which is useful to avoid traffic blackholing after a reboot of the switch. 
+# auto-recovery: command has a default timer of 240 seconds.
+
+In addition, it is recommended to use the configuration synchronization graceful consistency-check feature to minimize disruption when a Type 1 mismatch occurs. Examples of Type 1 mismatches could be the STP mode or the STP port type between the vPC peer switches. The show vpc consistency-parameters global output illustrates the Type 1 and Type 2 parameters of a vPC.
+
+NX-1/2(config)# vpc domain 1
+NX-1/2(config-vpc-domain)# delay restore 360
+NX-1/2(config-vpc-domain)# auto-recovery				<!--enables restoring of vPCs in a peer-detached state after reload.. will wait for 240 seconds to determine if peer is un-reachable
+NX-1/2(config-vpc-domain)# graceful consistency-check
+NX-1/2(config-vpc-domain)# ip arp synchronize
+
+
+-----------------------------------------------------------------------------------------------------
